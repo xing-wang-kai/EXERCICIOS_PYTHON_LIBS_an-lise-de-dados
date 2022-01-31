@@ -4,6 +4,10 @@
 
 from bs4 import BeautifulSoup
 import requests
+import pandas as pd
+import lxml
+import html5lib
+from datetime import date
 
 
 texto_html = requests.get('https://www.nytimes.com/interactive/2017/06/23/opinion/trumps-lies.html').text
@@ -43,3 +47,64 @@ print('--' * 40)
 print('-=' * 40)
 
 print(len(dados))
+
+df_noticia = pd.DataFrame(dados, columns = ["datas", "comentarios", "explicacao", "url"])
+print("---"*30)
+print(df_noticia)
+print("---"*30)
+
+g1_url = 'https://g1.globo.com/'
+g1_conteudo = requests.get(g1_url).text
+
+g1_bs_conteudo = BeautifulSoup(g1_conteudo, 'html.parser')
+
+g1_noticias = g1_bs_conteudo.find_all('div', attrs={'class': 'feed-post-body'})
+
+print(g1_noticias[0].prettify())
+print((g1_noticias[0].contents[0]))
+print((g1_noticias[0].contents[1]))
+print((g1_noticias[0].contents[2]))
+print((g1_noticias[0].contents[3]))
+
+
+
+g1_dados = []
+for item in g1_noticias:
+    conteudo1 = item.contents[0].text.strip()
+    conteudo2 = item.contents[1].text.strip()
+    conteudo3 = item.contents[2].text.strip()
+    conteudo4 = item.contents[3].text.strip()
+
+    g1_dados.append((conteudo1, conteudo2, conteudo3, conteudo4))
+
+for item in g1_dados:
+    print("-=" *40)
+    print(f"Primeiro: {item[0]}")
+    print(f"Segundo: {item[1]}")
+    print(f"Terceiro: {item[2]}")
+    print(f"Quarto: {item[3]}")
+    print("-=" *40)
+
+
+df_g1_noticias = pd.DataFrame(g1_dados, columns = ['primeiro', 'segundo', 'terceiro', 'quarto'])
+print(df_g1_noticias)
+
+
+sport_url = 'https://www.fdic.gov/bank/individual/failed/banklist.html'
+
+sport_noticia = requests.get(sport_url).text
+
+sport_noticia_bs = BeautifulSoup(sport_noticia, 'html.parser')
+
+sport_list_noticia = sport_noticia_bs.find_all('div', attrs={'class': 'feed-postbody'})
+
+print(sport_noticia_bs)
+
+selic_url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados'
+selic_dados = pd.read_json(selic_url)
+selic_dados.drop_duplicates(keep='last', inplace=True)
+selic_dados['responsável'] = 'autor'
+selic_dados['DATA'] = date.today()
+selic_dados['DATA'] = selic_dados['DATA'].astype('datetime64[ns]')
+selic_dados['data'] = pd.to_datetime(selic_dados['data'], dayfirst=True)
+print(selic_dados)
