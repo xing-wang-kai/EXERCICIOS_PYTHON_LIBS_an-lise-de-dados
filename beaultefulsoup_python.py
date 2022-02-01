@@ -107,4 +107,11 @@ selic_dados['responsável'] = 'autor'
 selic_dados['DATA'] = date.today()
 selic_dados['DATA'] = selic_dados['DATA'].astype('datetime64[ns]')
 selic_dados['data'] = pd.to_datetime(selic_dados['data'], dayfirst=True)
+selic_dados.sort_values("data", ascending=False, inplace=True)
+#selic_dados.reset_index(drop=True, inplace=True)
+novos_selic_index = [f'SELIC_{indice}' for indice in selic_dados.index]
+selic_dados.set_index(keys=[novos_selic_index], inplace=True)
+
+selic_dados['responsável'] = selic_dados['responsável'].str.upper()
+
 print(selic_dados)
